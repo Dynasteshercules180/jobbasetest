@@ -1,38 +1,37 @@
-<nav class="bg-white shadow-md relative">
+<nav class="navbar">
   <!-- Unsichtbarer Klickbereich auf der linken Seite -->
   <a href="index.html"
-     class="absolute top-0 left-0 w-[120px] h-full z-10"
+     class="logo-link"
      aria-label="Zur Startseite">
   </a>
 
-  <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-    
+  <div class="nav-container">
     <!-- Logo-Bereich -->
-    <div class="flex items-center gap-2">
-      <img src="logo.png" alt="JobBase Logo" class="h-10 w-auto max-h-10 max-w-[150px] object-contain" />
-      <span class="text-xl font-semibold text-gray-800">JobBase</span>
+    <div class="nav-left">
+      <img src="logo.png" alt="JobBase Logo" class="logo-img" />
+      <span class="logo-text">JobBase</span>
     </div>
 
     <!-- Hauptnavigation -->
-    <div class="flex items-center gap-4">
-      <a href="jobsuche.html" class="text-gray-700 hover:text-blue-600">Job suchen</a>
-      <a href="jobanbieten.html" class="text-gray-700 hover:text-blue-600">Job anbieten</a>
+    <div class="nav-middle">
+      <a href="jobsuche.html" class="nav-link">Job suchen</a>
+      <a href="jobanbieten.html" class="nav-link">Job anbieten</a>
     </div>
 
     <!-- Auth-Bereich -->
-    <div class="flex items-center gap-3">
+    <div class="nav-right">
       <!-- Wenn NICHT eingeloggt -->
-      <div id="auth-buttons">
-        <a href="anmelden.html" class="text-sm text-blue-600 hover:underline">Anmelden</a>
-        <a href="anmelden.html#register" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Registrieren</a>
+      <div id="auth-buttons" class="auth-buttons">
+        <a href="anmelden.html" class="auth-link">Anmelden</a>
+        <a href="anmelden.html#register" class="auth-button">Registrieren</a>
       </div>
 
       <!-- Wenn eingeloggt -->
-      <div id="user-profile" class="hidden flex items-center gap-3">
-        <span id="user-email" class="text-sm text-gray-600"></span>
-        <a href="profil.html" class="text-sm text-gray-700 hover:text-blue-600">Profil</a>
-        <a href="favoriten.html" class="text-sm text-gray-700 hover:text-blue-600">Favoriten</a>
-        <button onclick="logout()" class="text-sm bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Logout</button>
+      <div id="user-profile" class="user-profile hidden">
+        <span id="user-email" class="user-email"></span>
+        <a href="profil.html" class="nav-link">Profil</a>
+        <a href="favoriten.html" class="nav-link">Favoriten</a>
+        <button onclick="logout()" class="logout-button">Logout</button>
       </div>
     </div>
   </div>
