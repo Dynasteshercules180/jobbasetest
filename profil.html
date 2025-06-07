@@ -19,23 +19,115 @@
   </script>
 
   <main class="max-w-xl mx-auto py-10 px-4 bg-white shadow-md rounded mt-10">
-    <h1 class="text-2xl font-semibold mb-6">Mein Profil</h1>
+    <h1 class="text-2xl font-semibold mb-6 text-center">Mein Profil</h1>
 
-    <form id="profile-form" class="space-y-4">
-      <div class="flex items-center gap-4">
-        <img id="avatar-preview" src="default-avatar.png" alt="Profilbild" class="w-20 h-20 rounded-full object-cover border" />
-        <input type="file" id="avatar-upload" accept="image/*" class="text-sm" />
+    <form id="profile-form" class="space-y-4 text-center">
+      <div class="flex justify-center items-center flex-col gap-4">
+        <img id="avatar-preview" src="default-avatar.png" alt="Profilbild" class="w-24 h-24 rounded-full object-cover border" />
+        <input type="file" id="avatar-upload" accept="image/*" />
       </div>
 
       <input id="first-name" type="text" placeholder="Vorname" class="w-full border px-3 py-2 rounded" />
       <input id="last-name" type="text" placeholder="Nachname" class="w-full border px-3 py-2 rounded" />
+      <input id="age" type="number" placeholder="Alter" class="w-full border px-3 py-2 rounded" />
       <textarea id="bio" rows="3" placeholder="Über mich" class="w-full border px-3 py-2 rounded"></textarea>
 
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Speichern</button>
-      <p id="status" class="text-sm mt-2 text-center"></p>
+      <p id="status" class="text-sm mt-2 text-center text-gray-600"></p>
     </form>
   </main>
 
-  <script src="/script.js" defer></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://ytcrvruzmqjehnoaffda.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0Y3J2cnV6bXFqZWhub2FmZmRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MDc4NDUsImV4cCI6MjA2MDM4Mzg0NX0.gndc10XvC_Imyl3mPXb8EyXHKZiLAa3FHSn5J39qUB0"
+    );
+
+    let currentUser = null;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        document.getElementById("status").textContent = "❌ Nicht eingeloggt.";
+        return;
+      }
+
+      currentUser = user;
+
+      // Profil laden
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (data) {
+        document.getElementById("first-name").value = data.first_name || "";
+        document.getElementById("last-name").value = data.last_name || "";
+        document.getElementById("bio").value = data.bio || "";
+        document.getElementById("age").value = data.age || "";
+
+        if (data.avatar_url) {
+          const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(data.avatar_url);
+          document.getElementById("avatar-preview").src = avatarData?.publicUrl || "default-avatar.png";
+        }
+      }
+
+      // Avatar-Vorschau
+      document.getElementById("avatar-upload").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          document.getElementById("avatar-preview").src = URL.createObjectURL(file);
+        }
+      });
+    });
+
+    document.getElementById("profile-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const firstName = document.getElementById("first-name").value;
+      const lastName = document.getElementById("last-name").value;
+      const bio = document.getElementById("bio").value;
+      const age = parseInt(document.getElementById("age").value);
+      const file = document.getElementById("avatar-upload").files[0];
+
+      let avatar_url = null;
+
+      // Falls neues Bild ausgewählt, in Storage hochladen
+      if (file) {
+        const filePath = `${currentUser.id}/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, file, { upsert: true });
+
+        if (uploadError) {
+          document.getElementById("status").textContent = "❌ Fehler beim Hochladen des Bildes.";
+          return;
+        }
+
+        avatar_url = filePath;
+      }
+
+      // Profil aktualisieren
+      const updateData = {
+        first_name: firstName,
+        last_name: lastName,
+        bio,
+        age
+      };
+
+      if (avatar_url) updateData.avatar_url = avatar_url;
+
+      const { error } = await supabase
+        .from("user_profiles")
+        .update(updateData)
+        .eq("id", currentUser.id);
+
+      document.getElementById("status").textContent = error
+        ? "❌ Fehler beim Speichern."
+        : "✅ Profil gespeichert.";
+    });
+  </script>
 </body>
 </html>
