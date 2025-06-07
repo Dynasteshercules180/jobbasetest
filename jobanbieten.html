@@ -87,8 +87,10 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) {
+      const userResponse = await supabase.auth.getUser();
+      const user = userResponse.data.user;
+
+      if (!user) {
         message.textContent = "❌ Bitte zuerst einloggen.";
         message.style.color = "red";
         return;
@@ -103,13 +105,21 @@
         urgency: form.urgency.value,
         payment: form.payment.value,
         created_at: new Date().toISOString(),
-        user_id: user.data.user.id
+        user_id: user.id
       };
+
+      // Optional: Validierung zusätzlicher Felder
+      if (!jobData.title || !jobData.description || !jobData.category || !jobData.location) {
+        message.textContent = "❌ Bitte alle Pflichtfelder ausfüllen.";
+        message.style.color = "red";
+        return;
+      }
 
       const { error } = await supabase.from('mini_jobs').insert([jobData]);
 
       if (error) {
-        message.textContent = "❌ Fehler beim Speichern.";
+        console.error("Fehler beim Einfügen:", error);
+        message.textContent = "❌ Fehler beim Speichern: " + error.message;
         message.style.color = "red";
       } else {
         message.textContent = "✅ Job erfolgreich veröffentlicht!";
