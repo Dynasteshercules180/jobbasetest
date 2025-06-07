@@ -18,20 +18,105 @@
       });
   </script>
 
-  <main class="container mx-auto px-4 max-w-2xl mt-10">
-    <h2 class="text-2xl font-semibold mb-6 text-center">Job in deiner Nachbarschaft anbieten</h2>
+  <main class="container" style="max-width: 640px; margin-top: 40px;">
+    <h2 class="text-center" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px;">
+      Job in deiner Nachbarschaft anbieten
+    </h2>
 
-    <form id="jobForm" class="space-y-4 bg-white p-6 rounded shadow">
-      <input type="text" id="title" placeholder="Jobtitel z. B. 'Rasen mähen'" class="w-full border px-3 py-2 rounded" required />
-      <textarea id="description" placeholder="Beschreibe den Job..." rows="4" class="w-full border px-3 py-2 rounded" required></textarea>
-      <input type="text" id="location" placeholder="Ort oder Stadtteil" class="w-full border px-3 py-2 rounded" required />
-      <input type="number" id="payment" placeholder="Bezahlung in €" class="w-full border px-3 py-2 rounded" required />
-      <input type="date" id="date" class="w-full border px-3 py-2 rounded" required />
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Job veröffentlichen</button>
-      <p id="message" class="text-center text-sm mt-4"></p>
+    <form id="jobForm" class="form-box">
+      <div class="form-group">
+        <label>Titel *</label>
+        <input id="title" required placeholder="z. B. Hilfe beim Umzug" />
+      </div>
+
+      <div class="form-group">
+        <label>Beschreibung *</label>
+        <textarea id="description" rows="4" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Ort *</label>
+        <input id="location" required placeholder="z. B. Berlin-Prenzlauer Berg" />
+      </div>
+
+      <div class="form-group">
+        <label>Kategorie *</label>
+        <select id="category" required>
+          <option value="">Bitte wählen…</option>
+          <option value="🐶 Gassi gehen">🐶 Gassi gehen</option>
+          <option value="🍳 Kochen">🍳 Kochen</option>
+          <option value="🌿 Rasen mähen">🌿 Rasen mähen</option>
+          <option value="👶 Babysitten">👶 Babysitten</option>
+          <option value="🛒 Einkaufen">🛒 Einkaufen</option>
+          <option value="📚 Nachhilfe">📚 Nachhilfe</option>
+          <option value="🧽 Putzen">🧽 Putzen</option>
+          <option value="🚗 Transport">🚗 Transport</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Dauer</label>
+          <input id="duration" placeholder="z. B. 2h" />
+        </div>
+        <div class="form-group">
+          <label>Dringlichkeit</label>
+          <input id="urgency" placeholder="z. B. Heute" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Bezahlung</label>
+        <input id="payment" placeholder="z. B. 15€/h oder Kuchen" />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full">Job veröffentlichen</button>
+      <p id="message" class="text-center text-sm mt-20"></p>
     </form>
   </main>
 
-  <script src="/script.js" defer></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://ytcrvruzmqjehnoaffda.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0Y3J2cnV6bXFqZWhub2FmZmRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MDc4NDUsImV4cCI6MjA2MDM4Mzg0NX0.gndc10XvC_Imyl3mPXb8EyXHKZiLAa3FHSn5J39qUB0"
+    );
+
+    const form = document.getElementById('jobForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        message.textContent = "❌ Bitte zuerst einloggen.";
+        message.style.color = "red";
+        return;
+      }
+
+      const jobData = {
+        title: form.title.value,
+        description: form.description.value,
+        location: form.location.value,
+        category: form.category.value,
+        duration: form.duration.value,
+        urgency: form.urgency.value,
+        payment: form.payment.value,
+        created_at: new Date().toISOString(),
+        user_id: user.data.user.id
+      };
+
+      const { error } = await supabase.from('mini_jobs').insert([jobData]);
+
+      if (error) {
+        message.textContent = "❌ Fehler beim Speichern.";
+        message.style.color = "red";
+      } else {
+        message.textContent = "✅ Job erfolgreich veröffentlicht!";
+        message.style.color = "green";
+        form.reset();
+      }
+    });
+  </script>
 </body>
 </html>
