@@ -53,11 +53,14 @@
           title,
           description,
           location,
-          category,
           duration,
           urgency,
           payment,
           created_at,
+          job_categories (
+            name,
+            icon
+          ),
           user_profiles (
             first_name,
             last_name,
@@ -86,6 +89,7 @@
 
       for (const job of filtered) {
         const profile = job.user_profiles;
+        const category = job.job_categories;
         const card = document.createElement('div');
         card.className = "job-card";
 
@@ -97,7 +101,7 @@
               <p class="job-bio">${profile?.bio || ''}</p>
             </div>
           </div>
-          <h3 class="job-title">${job.category || ''} ${job.title}</h3>
+          <h3 class="job-title">${category?.icon || ''} ${category?.name || ''} – ${job.title}</h3>
           <p class="job-description">${job.description}</p>
           <p class="job-meta">📍 ${job.location} | 🕒 ${job.urgency || 'Flexibel'} | 💶 ${job.payment || 'Auf Anfrage'}</p>
         `;
