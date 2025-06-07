@@ -21,7 +21,9 @@
   <main class="container" style="max-width: 600px; margin-top: 40px;">
     <h1 class="text-center text-2xl font-semibold mb-6">👤 Mein Profil</h1>
 
-    <form id="profile-form" class="form-box">
+    <p id="status" class="text-center text-sm mt-2 text-red-600"></p>
+
+    <form id="profile-form" class="form-box" style="display: none;">
       <div id="avatar-wrapper" class="text-center mb-4" style="display: none;">
         <img id="avatar-preview" alt="Profilbild"
              style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 2px solid #ccc;" />
@@ -36,7 +38,6 @@
       <textarea id="bio" rows="3" placeholder="Über mich" class="input"></textarea>
 
       <button type="submit" class="btn btn-primary btn-full mt-4">Speichern</button>
-      <p id="status" class="text-center text-sm mt-4 text-gray-600"></p>
     </form>
   </main>
 
@@ -49,15 +50,16 @@
     let currentUser = null;
 
     document.addEventListener("DOMContentLoaded", async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        document.getElementById("status").textContent = "❌ Nicht eingeloggt.";
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (!user || authError) {
+        document.getElementById("status").textContent = "❌ Bitte melde dich an, um dein Profil zu bearbeiten.";
         return;
       }
 
       currentUser = user;
+      document.getElementById("profile-form").style.display = "block";
 
-      // Profil laden
       const { data, error } = await supabase
         .from("user_profiles")
         .select("*")
@@ -79,7 +81,6 @@
         }
       }
 
-      // Bild-Vorschau bei Upload
       document.getElementById("avatar-upload").addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) {
