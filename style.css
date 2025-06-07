@@ -447,6 +447,64 @@ footer {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Profile (neu) */
+.profile-wrapper {
+  background-color: white;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.profile-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--primary-color);
+}
+
+.avatar-preview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--light-gray);
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.avatar-preview:hover {
+  border-color: var(--primary-color);
+}
+
+.avatar-upload {
+  display: block;
+  margin: 0 auto 20px auto;
+  font-size: 0.9rem;
+  color: var(--gray-color);
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--light-gray);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+textarea.input {
+  resize: vertical;
+}
+
 /* Utility-Klassen */
 .text-center {
   text-align: center;
