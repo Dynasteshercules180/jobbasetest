@@ -18,22 +18,25 @@
       });
   </script>
 
-  <main class="max-w-xl mx-auto py-10 px-4 bg-white shadow-md rounded mt-10">
-    <h1 class="text-2xl font-semibold mb-6 text-center">Mein Profil</h1>
+  <main class="container" style="max-width: 600px; margin-top: 40px;">
+    <h1 class="text-center text-2xl font-semibold mb-6">👤 Mein Profil</h1>
 
-    <form id="profile-form" class="space-y-4 text-center">
-      <div class="flex justify-center items-center flex-col gap-4">
-        <img id="avatar-preview" src="default-avatar.png" alt="Profilbild" class="w-24 h-24 rounded-full object-cover border" />
+    <form id="profile-form" class="form-box">
+      <div id="avatar-wrapper" class="text-center mb-4" style="display: none;">
+        <img id="avatar-preview" alt="Profilbild"
+             style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 2px solid #ccc;" />
+      </div>
+      <div class="text-center mb-4">
         <input type="file" id="avatar-upload" accept="image/*" />
       </div>
 
-      <input id="first-name" type="text" placeholder="Vorname" class="w-full border px-3 py-2 rounded" />
-      <input id="last-name" type="text" placeholder="Nachname" class="w-full border px-3 py-2 rounded" />
-      <input id="age" type="number" placeholder="Alter" class="w-full border px-3 py-2 rounded" />
-      <textarea id="bio" rows="3" placeholder="Über mich" class="w-full border px-3 py-2 rounded"></textarea>
+      <input id="first-name" type="text" placeholder="Vorname" required class="input" />
+      <input id="last-name" type="text" placeholder="Nachname" required class="input" />
+      <input id="age" type="number" placeholder="Alter" class="input" min="0" />
+      <textarea id="bio" rows="3" placeholder="Über mich" class="input"></textarea>
 
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Speichern</button>
-      <p id="status" class="text-sm mt-2 text-center text-gray-600"></p>
+      <button type="submit" class="btn btn-primary btn-full mt-4">Speichern</button>
+      <p id="status" class="text-center text-sm mt-4 text-gray-600"></p>
     </form>
   </main>
 
@@ -69,15 +72,20 @@
 
         if (data.avatar_url) {
           const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(data.avatar_url);
-          document.getElementById("avatar-preview").src = avatarData?.publicUrl || "default-avatar.png";
+          if (avatarData?.publicUrl) {
+            document.getElementById("avatar-preview").src = avatarData.publicUrl;
+            document.getElementById("avatar-wrapper").style.display = "block";
+          }
         }
       }
 
-      // Avatar-Vorschau
+      // Bild-Vorschau bei Upload
       document.getElementById("avatar-upload").addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) {
-          document.getElementById("avatar-preview").src = URL.createObjectURL(file);
+          const preview = document.getElementById("avatar-preview");
+          preview.src = URL.createObjectURL(file);
+          document.getElementById("avatar-wrapper").style.display = "block";
         }
       });
     });
@@ -94,12 +102,15 @@
 
       let avatar_url = null;
 
-      // Falls neues Bild ausgewählt, in Storage hochladen
       if (file) {
         const filePath = `${currentUser.id}/${Date.now()}_${file.name}`;
         const { error: uploadError } = await supabase.storage
           .from("avatars")
-          .upload(filePath, file, { upsert: true });
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type,
+          });
 
         if (uploadError) {
           document.getElementById("status").textContent = "❌ Fehler beim Hochladen des Bildes.";
@@ -109,12 +120,11 @@
         avatar_url = filePath;
       }
 
-      // Profil aktualisieren
       const updateData = {
         first_name: firstName,
         last_name: lastName,
         bio,
-        age
+        age: isNaN(age) ? null : age,
       };
 
       if (avatar_url) updateData.avatar_url = avatar_url;
