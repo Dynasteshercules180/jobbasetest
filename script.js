@@ -99,11 +99,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         if (error) throw error;
 
-        await supabase.from("profiles").insert([{
+        // WICHTIG: Benutzer auch in user_profiles einfügen
+        await supabase.from("user_profiles").insert([{
           id: data.user.id,
           email,
           user_type: userType,
-          created_at: new Date(),
+          created_at: new Date().toISOString(),
         }]);
 
         showNotification("Registrierung erfolgreich! Bitte E-Mail bestätigen.", "success");
@@ -148,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Klick außerhalb Modals schließt es
   window.addEventListener("click", (e) => {
     if (e.target === document.getElementById("login-modal")) {
       document.getElementById("login-modal")?.classList.add("hidden");
