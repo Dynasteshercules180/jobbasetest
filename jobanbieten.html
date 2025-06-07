@@ -43,14 +43,6 @@
         <label>Kategorie *</label>
         <select id="category" required>
           <option value="">Bitte wählen…</option>
-          <option value="🐶 Gassi gehen">🐶 Gassi gehen</option>
-          <option value="🍳 Kochen">🍳 Kochen</option>
-          <option value="🌿 Rasen mähen">🌿 Rasen mähen</option>
-          <option value="👶 Babysitten">👶 Babysitten</option>
-          <option value="🛒 Einkaufen">🛒 Einkaufen</option>
-          <option value="📚 Nachhilfe">📚 Nachhilfe</option>
-          <option value="🧽 Putzen">🧽 Putzen</option>
-          <option value="🚗 Transport">🚗 Transport</option>
         </select>
       </div>
 
@@ -83,12 +75,30 @@
 
     const form = document.getElementById('jobForm');
     const message = document.getElementById('message');
+    const categorySelect = document.getElementById('category');
+
+    async function loadCategories() {
+      const { data, error } = await supabase.from('job_categories').select('*');
+      if (error) {
+        console.error("Fehler beim Laden der Kategorien:", error);
+        return;
+      }
+
+      data.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = `${category.icon || ""} ${category.name}`;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    loadCategories();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const userResponse = await supabase.auth.getUser();
-      const user = userResponse.data.user;
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData.user;
 
       if (!user) {
         message.textContent = "❌ Bitte zuerst einloggen.";
@@ -100,7 +110,7 @@
         title: form.title.value,
         description: form.description.value,
         location: form.location.value,
-        category: form.category.value,
+        category_id: form.category.value,
         duration: form.duration.value,
         urgency: form.urgency.value,
         payment: form.payment.value,
@@ -108,8 +118,8 @@
         user_id: user.id
       };
 
-      // Optional: Validierung zusätzlicher Felder
-      if (!jobData.title || !jobData.description || !jobData.category || !jobData.location) {
+      // Validierung (optional aber nützlich)
+      if (!jobData.title || !jobData.description || !jobData.category_id || !jobData.location) {
         message.textContent = "❌ Bitte alle Pflichtfelder ausfüllen.";
         message.style.color = "red";
         return;
