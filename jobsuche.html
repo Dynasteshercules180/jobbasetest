@@ -90,12 +90,31 @@
       for (const job of filtered) {
         const profile = job.user_profiles;
         const category = job.job_categories;
+
+        // Avatar-URL aus Storage holen (mit Fallback)
+        let avatarUrl = "";
+
+        if (profile?.avatar_url) {
+          const { data: publicData } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(profile.avatar_url);
+          avatarUrl = publicData?.publicUrl;
+        }
+
+        // Fallback-Bild aus Storage
+        if (!avatarUrl) {
+          const { data: fallbackData } = supabase.storage
+            .from("avatars")
+            .getPublicUrl("default-avatar.png");
+          avatarUrl = fallbackData?.publicUrl;
+        }
+
         const card = document.createElement('div');
         card.className = "job-card";
 
         card.innerHTML = `
           <div class="job-card-header">
-            <img src="${profile?.avatar_url || 'https://via.placeholder.com/40'}" class="avatar" />
+            <img src="${avatarUrl}" class="avatar" />
             <div>
               <p class="job-name">${profile?.first_name || ''} ${profile?.last_name || ''}</p>
               <p class="job-bio">${profile?.bio || ''}</p>
