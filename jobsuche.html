@@ -50,7 +50,14 @@
       const { data, error } = await supabase
         .from('mini_jobs')
         .select(`
-          *,
+          title,
+          description,
+          location,
+          category,
+          duration,
+          urgency,
+          payment,
+          created_at,
           user_profiles (
             first_name,
             last_name,
@@ -61,6 +68,7 @@
         .order('created_at', { ascending: false });
 
       if (error || !data) {
+        console.error("Fehler beim Abrufen:", error);
         noResults.style.display = 'block';
         return;
       }
