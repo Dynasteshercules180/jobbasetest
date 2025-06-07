@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anmeldung – Jobbase</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Navigation -->
+  <div id="nav-placeholder"></div>
+  <script>
+    fetch("nav.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("nav-placeholder").innerHTML = html;
+      });
+  </script>
+
+  <!-- Login/Register -->
+  <div class="flex items-center justify-center py-10">
+    <div class="bg-white rounded shadow p-6 w-full max-w-md">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold">Jobbase</h1>
+        <p class="text-sm text-gray-500">Anmelden oder Registrieren</p>
+      </div>
+
+      <div class="flex mb-4">
+        <button id="login-tab" class="flex-1 px-4 py-2 font-semibold border-b-2 border-blue-600">Login</button>
+        <button id="register-tab" class="flex-1 px-4 py-2 font-semibold text-gray-500">Registrieren</button>
+      </div>
+
+      <!-- Login-Formular -->
+      <form id="login-form" class="space-y-4">
+        <input type="email" id="login-email" placeholder="E-Mail" required class="w-full border px-3 py-2 rounded" />
+        <input type="password" id="login-password" placeholder="Passwort" required class="w-full border px-3 py-2 rounded" />
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Anmelden</button>
+      </form>
+
+      <!-- Registrierungs-Formular -->
+      <form id="register-form" class="space-y-4 hidden mt-6">
+        <input type="email" id="register-email" placeholder="E-Mail" required class="w-full border px-3 py-2 rounded" />
+        <input type="password" id="register-password" placeholder="Passwort (min. 6 Zeichen)" required minlength="6" class="w-full border px-3 py-2 rounded" />
+        <input type="password" id="register-password-confirm" placeholder="Passwort bestätigen" required minlength="6" class="w-full border px-3 py-2 rounded" />
+        <div class="flex items-center gap-2 text-sm">
+          <input type="checkbox" id="terms-checkbox" required />
+          <label for="terms-checkbox">Ich akzeptiere die AGB & Datenschutz</label>
+        </div>
+        <div class="text-sm">Ich bin ein:
+          <label><input type="radio" name="user-type" value="worker" checked> Arbeitnehmer</label>
+          <label><input type="radio" name="user-type" value="employer"> Arbeitgeber</label>
+        </div>
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Registrieren</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tab-Switching -->
+  <script>
+    const loginTab = document.getElementById('login-tab');
+    const registerTab = document.getElementById('register-tab');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+
+    loginTab?.addEventListener('click', () => {
+      loginForm?.classList.remove('hidden');
+      registerForm?.classList.add('hidden');
+      loginTab.classList.add('border-blue-600');
+      registerTab.classList.remove('border-blue-600');
+      registerTab.classList.add('text-gray-500');
+      loginTab.classList.remove('text-gray-500');
+    });
+
+    registerTab?.addEventListener('click', () => {
+      loginForm?.classList.add('hidden');
+      registerForm?.classList.remove('hidden');
+      registerTab.classList.add('border-blue-600');
+      loginTab.classList.remove('border-blue-600');
+      loginTab.classList.add('text-gray-500');
+      registerTab.classList.remove('text-gray-500');
+    });
+
+    // Direkt beim Laden #register anzeigen
+    if (window.location.hash === "#register") {
+      registerTab?.click();
+    }
+  </script>
+
+<script src="script.js" defer></script>
+</body>
+</html>
